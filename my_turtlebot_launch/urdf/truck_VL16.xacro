@@ -1,0 +1,16 @@
+
+<robot name="truck_lidar" xmlns:xacro="http://wiki.ros.org/xacro" >   
+    <xacro:include filename="$(find my_turtlebot_launch)/urdf/include/my_inertial.xacro" />
+    <xacro:include filename="$(find my_turtlebot_launch)/urdf/cars/truck.xacro"/>
+    <xacro:include filename="$(find my_turtlebot_launch)/urdf/sensor/VLP-16.xacro"/>
+    <xacro:include filename="$(find my_turtlebot_launch)/urdf/sensor/my_sensor_imu.xacro" />
+
+    <xacro:VLP-16 parent="base_link" name="velodyne" topic="/velodyne_points"  hz="10" samples="1024" gpu="false">
+        <origin xyz="1.0 0.0 3.7" rpy="0 0 0" />
+    </xacro:VLP-16> 
+    
+    <xacro:car_imu parent="velodyne">
+        <origin xyz="0.0 -0.2 0.0" rpy="0 0 0" />
+    </xacro:car_imu>
+    
+</robot>

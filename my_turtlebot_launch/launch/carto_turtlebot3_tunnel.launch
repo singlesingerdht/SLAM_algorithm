@@ -1,0 +1,90 @@
+<launch>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos" default="1.0"/>
+  <arg name="y_pos" default="3.0"/>
+  <arg name="z_pos" default="0.0"/>
+  <arg name="Y_ang" default="1.57"/>
+
+ 	<!-- <include file="$(find my_turtlebot_launch)/launch/gmapping.launch"/> -->
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find my_turtlebot_launch)/world/my_maze.world"/>
+    <!-- <arg name="world_name" value="/opt/ros/melodic/share/turtlebot3_gazebo/worlds/turtlebot3_house.world"/> -->
+    <arg name="paused" value="false"/>
+     <arg name="use_sim_time" value="true"/> 
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- <include file="$(find cartographer_ros)/launch/backpack_2d.launch"/> -->
+
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/> -->
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" >
+      <!-- <arg name="ifpubodomTF" value="true"/> -->
+  </param>
+
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model turtlebot3 -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg Y_ang) -param robot_description" />
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find my_turtlebot_launch)/map/tunnel.yaml">
+    <remap from="map" to="/premap" />
+  </node>
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="link1_link2_broadcaster" args="0 0 0 0 0 0 1 premap map 100" /> -->
+
+  <!-- <include file= "$(find turtlebot3_navigation)/launch/amcl.launch"/> -->
+
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="footprint2scan" args="0 0 0 0 0 0 1 base_footprint base_scan 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="footprint2link" args="0 0 0 0 0 0 1 base_footprint base_link 100" /> -->
+
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_turtlebot_launch)/rviz/gmapping.rviz" required="true" />
+
+  
+
+   <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" args="
+          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_basename backpack_2d.lua"
+      output="screen">
+      <param name="/use_sim_time" value="true"/> 
+    <remap from="echoes" to="scan" />
+  </node> 
+
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.05" /> 
+ 
+
+  
+
+     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true" >
+     <!-- <param name="base_global_planner" value="global_planner/GlobalPlanner"/> 
+     <param name="planner_frequency" value="1.0" />
+     <param name="planner_patience" value="5.0" /> -->
+
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    <param name="controller_frequency" value="5.0" />
+    <param name="controller_patience" value="15.0" />
+
+    <!-- <param name="base_global_planner" value="global_planner/GlobalPlanner"/> -->
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
+      <rosparam file="$(find my_turtlebot_launch)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find my_turtlebot_launch)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find my_turtlebot_launch)/param/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find my_turtlebot_launch)/param/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find my_turtlebot_launch)/param/teb_local_planner_params.yaml" command="load" />
+  </node>
+
+  <!-- <include file="$(find rrt_exploration)/launch/single.launch"/>  -->
+  <!-- <include file="$(find explore_lite)/launch/explore.launch" /> -->
+
+  <!-- <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot"/> -->
+
+
+  <node pkg="my_turtlebot_launch" type="path_odom" name="path_odom" />
+  <node pkg="my_turtlebot_launch" type="pub_txt" name="pub_txt" />
+
+</launch>

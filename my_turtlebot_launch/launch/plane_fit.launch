@@ -1,0 +1,13 @@
+<launch>
+   <param name="pcdfile"  type="string" value="/home/thy/catkin_ws/src/my_turtlebot_launch/points/bun02.pcd"/>
+   <param name="lidar_topic" type="string" value="velodyne_points"/>
+   <param name="plane_topic" type="string" value="plane_points"/>
+   <param name="min_x" type="double" value="0"/>
+   <param name="max_x" type="double" value="10"/>
+   <param name="min_y" type="double" value="-5"/>
+   <param name="max_y" type="double" value="5"/>
+   <param name="min_z" type="double" value="-5"/>
+   <param name="max_z" type="double" value="-0.3"/>
+    <!-- <node pkg="my_turtlebot_launch" type="pcd_rviz" name="pcd_rviz" output="screen" /> -->
+    <node pkg="my_turtlebot_launch" type="plane_fit" name="plane_fit" output="screen" />
+</launch>

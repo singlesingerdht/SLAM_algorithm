@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<robot name="truck" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find my_turtlebot_launch)/urdf/include/my_inertial.xacro"/>
+
+  <xacro:property name="PI" value="3.14"/>
+
+  <link name="base_footprint">
+    <visual>
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="base_link" >
+    <visual>
+    <geometry>
+      <!-- <box size="3 2 1"/> -->
+      <mesh filename="package://my_turtlebot_launch/urdf/mesh/truck.stl"/>
+    </geometry>
+    <origin xyz="-1.4 -3.5 0.1" rpy="${PI/2} 0 ${PI/2}"/>
+      <material name="car_color">
+        <color rgba="0.3 0.5 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+    <!-- <geometry>
+        <box size="3 3 3"/>
+    </geometry>
+      <origin xyz="0 0 2" rpy="0 0 0"/> -->
+    <geometry>
+      <!-- <box size="3 2 1"/> -->
+      <mesh filename="package://my_turtlebot_launch/urdf/mesh/truck.stl"/>
+    </geometry>
+    <origin xyz="-1.4 -3.5 0.1" rpy="${PI/2} 0 ${PI/2}"/>
+    </collision>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1" />
+    </inertial>
+  </link>
+
+  <link name="left_wheel" >
+    <visual>
+    <geometry>
+      <cylinder length="0.1" radius="0.3"/>
+    </geometry>
+    <origin xyz="0 0 0" rpy="${PI/2} ${PI/2} 0"/>
+      <material name="car_color">
+        <color rgba="0.3 0.5 0.2 0"/>
+      </material>
+    </visual>
+    <xacro:cylinder_inertial_matrix m="20" r="0.3" h="0.1" />
+    <collision>
+    <geometry>
+      <cylinder length="0.1" radius="0.3"/>
+    </geometry>
+    <origin xyz="0 0 0" rpy="${PI/2} ${PI/2} 0"/>
+    </collision>
+  </link>
+
+    <link name="right_wheel" >
+    <visual>
+    <geometry>
+      <cylinder length="0.1" radius="0.3"/>
+    </geometry>
+    <origin xyz="0 0 0" rpy="${PI/2} ${PI/2} 0"/>
+      <material name="car_color">
+        <color rgba="0.3 0.5 0.2 0"/>
+      </material>
+    </visual>
+    <xacro:cylinder_inertial_matrix m="20" r="0.3" h="0." />
+    <collision>
+    <geometry>
+      <cylinder length="0.1" radius="0.3"/>
+    </geometry>
+    <origin xyz="0 0 0" rpy="${PI/2} ${PI/2} 0"/>
+    </collision>
+  </link>
+
+    <link name="support_wheel" >
+    <visual>
+    <geometry>
+      <sphere radius="0.3" />
+    </geometry>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="car_color">
+        <color rgba="0.3 0.5 0.2 0"/>
+      </material>
+    </visual>
+    <xacro:sphere_inertial_matrix m="10" r="0.2" />
+    <collision>
+      <geometry>
+        <sphere radius="0.3" />
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link> 
+
+  <joint name="footprint2_base" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="link2_lwheel" type="continuous">
+    <parent link="base_footprint"/>
+    <child link="left_wheel"/>
+    <origin xyz="-1.0 1.7 0" rpy="0 0 ${PI/2}"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="link2_rwheel" type="continuous">
+    <parent link="base_footprint"/>
+    <child link="right_wheel"/>
+    <origin xyz="1.0 1.7 0" rpy="0 0 ${PI/2}"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="link2_swheel" type="continuous">
+    <parent link="base_footprint"/>
+    <child link="support_wheel"/>
+    <origin xyz=" 0 -0.7 0" rpy="0 0 0"/>
+    <axis xyz="1 1 1"/>
+  </joint> 
+
+  <gazebo reference="base_link">
+      <material>Gazebo/White</material>
+  </gazebo>
+    <gazebo reference="left_wheel">
+      <material>Gazebo/White</material>
+      <mu1>10</mu1>
+      <mu2>10</mu2>
+      <kp>10000000</kp>
+      <kd>1</kd>
+      <minDepth>0.001</minDepth>
+  </gazebo>
+    <gazebo reference="right_wheel">
+      <material>Gazebo/White</material>
+      <mu1>10</mu1>
+      <mu2>10</mu2>
+      <kp>10000000</kp>
+      <kd>1</kd>      
+      <minDepth>0.001</minDepth>
+  </gazebo>
+  <gazebo reference="support_wheel">
+      <material>Gazebo/White</material>
+      <mu1>10</mu1>
+      <mu2>10</mu2>
+      <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="differential_drive_controller" 
+            filename="libgazebo_ros_diff_drive.so">
+      <rosDebugLevel>Error</rosDebugLevel>
+      <publishWheelTF>false</publishWheelTF>
+      <robotNamespace>/</robotNamespace>
+      <publishTf>true</publishTf>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>false</publishWheelJointState>
+      <updateRate>50</updateRate>
+      <legacyMode>false</legacyMode>
+      <leftJoint>link2_lwheel</leftJoint>
+      <rightJoint>link2_rwheel</rightJoint>
+      <wheelSeparation>2</wheelSeparation>
+      <wheelDiameter>0.6</wheelDiameter>
+      <broadcastTF>1</broadcastTF>
+      <wheelTorque>10000</wheelTorque>
+      <wheelAcceleration>10.0</wheelAcceleration>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryFrame>odom</odometryFrame> 
+      <odometryTopic>odom</odometryTopic> 
+      <odometrySource>world</odometrySource> 
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+    </plugin>
+  </gazebo> 
+
+</robot>

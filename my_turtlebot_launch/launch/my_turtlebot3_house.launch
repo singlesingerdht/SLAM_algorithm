@@ -1,0 +1,51 @@
+<launch>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos" default="-3.0"/>
+  <arg name="y_pos" default="1.0"/>
+  <arg name="z_pos" default="0.0"/>
+
+	<include file="$(find gmapping)/launch/slam_gmapping_pr2.launch">
+	</include>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model turtlebot3 -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="footprint2scan" args="0 0 0 0 0 0 1 base_footprint base_scan 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="footprint2link" args="0 0 0 0 0 0 1 base_footprint base_link 100" /> -->
+
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_turtlebot_launch)/rviz/gmapping.rviz" required="true" />
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true" >
+	  <param name="controller_frequency" value="5.0"/> 
+	  <param name="controller_patiente" value="15.0"/>
+    <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
+      <rosparam file="$(find my_turtlebot_launch)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find my_turtlebot_launch)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find my_turtlebot_launch)/param/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find my_turtlebot_launch)/param/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find my_turtlebot_launch)/param/base_local_planner_params.yaml" command="load" />
+  </node>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find my_turtlebot_launch)/map/map.yaml">
+    <remap from="map" to="/premap" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="link1_link2_broadcaster" args="0 0 0 0 0 0 1 premap map 100" />
+
+</launch>

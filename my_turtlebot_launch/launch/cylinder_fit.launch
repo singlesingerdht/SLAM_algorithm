@@ -1,0 +1,12 @@
+<launch>
+   <param name="lidar_topic" type="string" value="livox_points"/>
+   <param name="plane_topic" type="string" value="cylinder_points"/>
+   <param name="min_x" type="double" value="0"/>
+   <param name="max_x" type="double" value="10"/>
+   <param name="min_y" type="double" value="-5"/>
+   <param name="max_y" type="double" value="5"/>
+   <param name="min_z" type="double" value="-5"/>
+   <param name="max_z" type="double" value="-0.3"/>
+    <!-- <node pkg="my_turtlebot_launch" type="pcd_rviz" name="pcd_rviz" output="screen" /> -->
+    <node pkg="my_turtlebot_launch" type="cylinder_fit" name="cylinder_fit" output="screen" />
+</launch>

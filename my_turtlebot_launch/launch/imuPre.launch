@@ -1,0 +1,4 @@
+<launch>
+   <!-- <param name="type" type="string" value="Velocity"/> -->
+    <node pkg="my_turtlebot_launch" type="imu_pre" name="imu_pre" output="screen" />
+</launch>

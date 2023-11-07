@@ -1,0 +1,45 @@
+<launch>
+    <!-- <include file="$(find my_turtlebot_launch)/launch/param.launch"/> -->
+    <arg name="range" default="15"/>
+    <arg name="Urange" default="15" />
+    <arg name="scan_topic" default="scan" />
+
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" clear_params="true">
+        <param name="odom_frame" value="odom"/>     <!--***世界坐标系-->
+        <param name="map_update_interval" value="1.0"/>     <!--地图更新间隔，两次scanmatch的间隔，地图更新也受scanmach的影响，如果scanmatch没有成功的话，是不会更新地图的-->
+
+        <!-- Set maxUrange < actual maximum range of the Laser -->
+        <param name="maxRange" value="$(arg range)"/>  <!--value="11.0"/>     探测最大可用范围，光束能到的范围default80.0-->
+        <param name="maxUrange" value="$(arg Urange)"/> <!-- value="9.0"/>-->
+        <param name="sigma" value="0.05"/>     <!-- 用作结束点匹配-->
+        <param name="kernelSize" value="1"/>
+        <param name="lstep" value="0.05"/>         <!--机器人移动的初始值（距离）-->
+        <param name="astep" value="0.05"/>        <!--机器人移动的初始值（角度）-->
+        <param name="iterations" value="5"/>       <!--icp的迭代次数-->
+        <param name="lsigma" value="0.075"/>     <!--波束的sigma，用来计算似然估计每次扫描跳过的波束-->
+        <param name="ogain" value="3.0"/>           <!--用来平滑重采样的影响-->
+        <param name="lskip" value="0"/>     <!--为0,表示所有的激光都处理，尽可能为零，每次扫描跳过的波束评估似然的增益，用来平滑重采样的影响-->
+ 
+        <param name="srr" value="0.01"/>     <!--以下四个参数是运动模型的噪声参数--><!--平移时里程误差平移函数0.01-->
+        <param name="srt" value="0.02"/>     <!--平移时里程误差旋转函数0.02-->
+        <param name="str" value="0.01"/>     <!--旋转时里程误差平移函数0.01-->
+        <param name="stt" value="0.02"/>     <!--旋转时里程误差旋转函数0.02-->
+        <param name="linearUpdate" value="0.5"/>     <!--机器人移动linearUpdate距离，进行scanmatch-->
+        <param name="angularUpdate" value="0.436"/>     <!--机器人选装angularUpdate角度，进行scanmatch--><!--机器人每旋转这么远处理一次扫描-->
+        <param name="temporalUpdate" value="-1.0"/>     <!--如果最新扫描处理比更新慢，则处理1次扫描，该值为负数时关闭基于时间的更新-->
+        <param name="resampleThreshold" value="0.5"/>     <!--基于重采样门限的Neff-->
+        <param name="particles" value="50"/>     <!--很重要，粒子个数80-->
+
+        <param name="xmin" value="-1.0"/>     <!--map初始化的大小--> <!--地图初始尺寸-100,-100,100,100-->
+        <param name="ymin" value="-1.0"/>
+        <param name="xmax" value="1.0"/>
+        <param name="ymax" value="1.0"/>
+        <param name="delta" value="0.1"/>     <!--地图分辨率-->
+
+        <param name="llsamplerange" value="0.01"/>
+        <param name="llsamplestep" value="0.01"/>
+        <param name="lasamplerange" value="0.005"/>
+        <param name="lasamplestep" value="0.005"/>
+        <remap from="scan" to="$(arg scan_topic)"/>
+    </node>
+</launch>

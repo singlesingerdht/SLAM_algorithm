@@ -1,0 +1,36 @@
+<robot name="my_vodyne" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <xacro:property name="M_PI" value="3.1415926"/>
+    <xacro:property name="laser_length" value="0.03" /> 
+    <xacro:property name="laser_radius" value="0.03" />
+    <xacro:property name="laser_x" value="0.0" /> 
+    <xacro:property name="laser_y" value="0.0" /> 
+    <xacro:property name="laser_z" value="0.055" /> 
+    <xacro:property name="laser_m" value="0.1" /> 
+
+    <link name="vodyne">
+        <visual>
+            <geometry>
+                <cylinder radius="${laser_radius}" length="${laser_length}" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="black" />
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${laser_radius}" length="${laser_length}" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </collision>
+        <xacro:cylinder_inertial_matrix m="${laser_m}" r="${laser_radius}" h="${laser_length}" />
+    </link>
+
+    <joint name="vodynetoBaselink" type="fixed">
+        <parent link="base_link" />
+        <child link="vodyne" />
+        <origin xyz="${laser_x} ${laser_y} ${laser_z}" />
+    </joint>
+    <gazebo reference="vodyne">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+</robot>

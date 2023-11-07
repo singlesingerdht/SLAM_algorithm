@@ -1,0 +1,32 @@
+<launch>
+    <arg name="robot_name" default="truck" />
+    <!-- 设置launch文件的参数 -->
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="fulse"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <!-- <arg name="world_name" default="$(find tianbot_mini)/worlds/room_mini.world" /> -->
+    <arg name="world_name" default="$(find my_turtlebot_launch)/world/my_tunnel_3.world" />
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)" />
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find my_turtlebot_launch)/urdf/truck_livox.xacro" />
+    <node pkg="gazebo_ros" type="spawn_model" name="model" args="-urdf -model livox -param robot_description"  />
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" />
+    <node pkg="tf" type="static_transform_publisher" name="link1_link2_broadcaster" args="0 0 3.7 0 0 0 base_link livox::base_footprint 100" />
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/thy/catkin_ws/src/my_turtlebot_launch/rviz/test_urdf.rviz"/>
+
+    <node pkg="my_turtlebot_launch" type="cylinder_fit" name="cylinder_fit" output="screen"/>
+    <node pkg="my_turtlebot_launch" type="imu_lidar" name="imu_lidar" output="screen"/>
+
+</launch>
